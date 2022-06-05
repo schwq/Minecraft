@@ -1,38 +1,39 @@
-// Basic group
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <math.h>
-#include <memory>
-#include <algorithm>
+#include "include.h"
+#include "shaderCompiler.h"
 
-// OPENGL group
-#include <GL/gl.h>
-#include <glm/glm.hpp>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-//#include <GL/glew.h>
-//#include <GL/glut.h>
+// Detected operating system
+constexpr const char system_os[] =
+#if defined(_WIN32) || defined(__CYGWIN__)
+"Windows";
+#elif defined( __APPLE__)
+"Apple";
+#elif defined(__linux__)
+"Linux";
+#else
+ #error
+#endif
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void error_callback(int error, const char* description);
+void escape_pressed(GLFWwindow *window);
 
 GLFWwindow* window;
 double global_time = glfwGetTime();
 int GLFW_MAJOR, GLFW_MINOR, GLFW_REVISION;
-
-// Error Function
-void error_callback(int error, const char* description)
-{
-    fprintf(stderr, "Error: %s\n", description);
-}
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 800;
 
 int main ( void ) {
 
     glfwInit();
 
-    // GLFW error handing callback
-    glfwSetErrorCallback(error_callback);
     // OpenGL minimum version 3.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    if(system_os == "Apple"){
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    }
 
     // Checking if glfw initialized
     if(!glfwInit()) { printf("Failed to Initialized GLFW"); return -1;  } 
@@ -47,20 +48,72 @@ int main ( void ) {
     // Create Window
     window = glfwCreateWindow(800,800,"Minecraft", NULL, NULL);
     if(!window) { printf("Failed to Initialized GLFW\n"); glfwTerminate(); return -1; }
-    
-    // Interval between swaping buffer (1sec), computers usually run on 60fps, so swaping with 0sec of interval consumes a lot of the cpu cycles.
-    glfwSwapInterval(1);
 
     // Make context 
     glfwMakeContextCurrent(window);
+    // GLFW error handing callback
+    glfwSetErrorCallback(error_callback);
+    // Window resize
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+     // checking is GLAD initialized
+    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+        printf("Failed to initialize GLAD"); 
+        glfwTerminate();
+        return -1;
+    }
 
     //OpenGL Part
 
+    float vertices_coordinates[] = {
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+         0.0f,  0.5f, 0.0f  
+    };
+
+    // Vertex Buffer Object
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_coordinates), vertices_coordinates, GL_STATIC_DRAW);
+
+    vertexShaderCompiler("./shaders/vertex.vertexshader");
+    fragmentShaderCompiler("./shaders/fragment.fragmentshader");
+
+    /* 
+    GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
+    GL_STATIC_DRAW: the data is set only once and used many times.
+    GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
+    */ 
+
+
     do {
+        //input 
+        escape_pressed(window);
+        
+        glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // swap and call events
         glfwSwapBuffers(window);
         glfwPollEvents(); 
     } while (!glfwWindowShouldClose(window));
+    
+    glfwTerminate();
     return 0;
 }
 
+// Callback function for errors
+void error_callback(int error, const char* description) {
+    fprintf(stderr, "Error: %s\n", description);
+}
+
+// Callback function for resizing window
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
+// Checking if esc key was pressed for closing window
+void escape_pressed(GLFWwindow *window) {
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
+}
