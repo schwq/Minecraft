@@ -76,9 +76,9 @@ int main ( void ) {
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_coordinates), vertices_coordinates, GL_STATIC_DRAW);
-
-    vertexShaderCompiler("./shaders/vertex.vertexshader");
-    fragmentShaderCompiler("./shaders/fragment.fragmentshader");
+    
+    GLuint ProgramID = shaderCompiler("./shaders/vertex.vertexshader", "./shaders/fragment.fragmentshader");
+    
 
     /* 
     GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.

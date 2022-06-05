@@ -1,9 +1,13 @@
 #include "include.h"
 #include <fstream>
 #include <iostream>
+#include "shaderCompiler.h"
 
-void vertexShaderCompiler(const char* vertex_path) {
-    std::ifstream vertexFile = std::ifstream(vertex_path, std::ios_base::in|std::ios::ate);
+unsigned int vertexShader;
+unsigned int fragmentShader;
+
+GLuint shaderCompiler(const char *vertexFilePath, const char*fragmentFilePath) {
+    std::ifstream vertexFile = std::ifstream(vertexFilePath, std::ios_base::in|std::ios::ate);
     if(vertexFile.is_open()) {
         auto vertexFileSize = vertexFile.tellg();
         std::cout << "Vertex shader file size: " << vertexFileSize << std::endl;
@@ -14,7 +18,6 @@ void vertexShaderCompiler(const char* vertex_path) {
         const char *vertexshaderSource = vertexContent.c_str();
         std::cout << "Vertex Shader Code: \n" << vertexshaderSource << std::endl;
 
-        unsigned int vertexShader;
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexshaderSource, NULL);
         glCompileShader(vertexShader);
@@ -35,10 +38,8 @@ void vertexShaderCompiler(const char* vertex_path) {
     else {
         std::cout << "Error reading vertex shader" << std::endl;
     }
-}
 
-void fragmentShaderCompiler(const char* fragment_path) {
-    std::ifstream fragmentFile = std::ifstream(fragment_path, std::ios_base::in|std::ios::ate);
+    std::ifstream fragmentFile = std::ifstream(fragmentFilePath, std::ios_base::in|std::ios::ate);
     if(fragmentFile.is_open()) {
         auto fragmentFileSize = fragmentFile.tellg();
         std::cout << "Fragment shader file size: " << fragmentFileSize << std::endl;
@@ -49,7 +50,6 @@ void fragmentShaderCompiler(const char* fragment_path) {
         const char *fragmentshaderSource = fragmentContent.c_str();
         std::cout << "Fragment Shader Code: \n" << fragmentshaderSource << std::endl;
 
-        unsigned int fragmentShader;
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &fragmentshaderSource, NULL);
         glCompileShader(fragmentShader);
@@ -70,4 +70,24 @@ void fragmentShaderCompiler(const char* fragment_path) {
     else {
         std::cout << "Error reading fragment shader" << std::endl;
     }
+
+    unsigned int shaderProgramID;
+    shaderProgramID = glCreateProgram();
+    glAttachShader(shaderProgramID, vertexShader);
+    glAttachShader(shaderProgramID, fragmentShader);
+    glLinkProgram(shaderProgramID);
+
+    int linking_success;
+    char linking_infoLog[512];
+    glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &linking_success);
+    if(!linking_success){
+        glGetProgramInfoLog(shaderProgramID, 512, NULL, linking_infoLog);
+    }
+
+    glUseProgram(shaderProgramID);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    return shaderProgramID;
 }
