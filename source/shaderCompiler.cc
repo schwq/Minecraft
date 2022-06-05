@@ -82,9 +82,9 @@ GLuint shaderCompiler(const char *vertexFilePath, const char*fragmentFilePath) {
     glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &linking_success);
     if(!linking_success){
         glGetProgramInfoLog(shaderProgramID, 512, NULL, linking_infoLog);
+    } else {
+        std::cout << "ProgramID linking Succeeded!" << std::endl;
     }
-
-    glUseProgram(shaderProgramID);
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);

@@ -72,11 +72,19 @@ int main ( void ) {
     };
 
     // Vertex Buffer Object
+    
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    
     unsigned int VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_coordinates), vertices_coordinates, GL_STATIC_DRAW);
     
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
     GLuint ProgramID = shaderCompiler("./shaders/vertex.vertexshader", "./shaders/fragment.fragmentshader");
     
 
@@ -90,9 +98,13 @@ int main ( void ) {
     do {
         //input 
         escape_pressed(window);
-        
+
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(ProgramID);
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         // swap and call events
         glfwSwapBuffers(window);
