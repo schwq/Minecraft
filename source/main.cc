@@ -1,5 +1,6 @@
 #include "include.h"
 #include "shaderCompiler.h"
+#include "textureCompiler.h"
 
 
 // Detected operating system
@@ -68,18 +69,17 @@ int main ( void ) {
     //OpenGL Part
 
     float vertices[] = {
-        0.5f, 0.5f, 0.0f, // top right
-        0.5f, -0.5f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, // bottom left
-        -0.5f, 0.5f, 0.0f // top left
+    // positions          // colors           // texture coords
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
     };
 
-    unsigned int indices[] = { // note that we start from 0!
+    unsigned int indices[] = {  
         0, 1, 3, // first triangle
-        1, 2, 3 // second triangle
+        1, 2, 3  // second triangle
     };
-
-    // Vertex Buffer Object
     
     unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
@@ -88,20 +88,41 @@ int main ( void ) {
 
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  
     
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    Shader shader("./shaders/vertex.vertexshader", "./shaders/fragment.fragmentshader");
+
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    Texture texture("../source/textures/wood.jpg");
 
 
     // WideMode, just drawing lines
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    GLuint ProgramID = shaderCompiler("./shaders/vertex.vertexshader", "./shaders/fragment.fragmentshader");
+   
+
     
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &vertexAttribsMax);
     printf("Maximun of Vertex Attributes supported: %i\n", vertexAttribsMax);
@@ -112,6 +133,7 @@ int main ( void ) {
     GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
     */ 
 
+  
 
     do {
         //input 
@@ -120,17 +142,13 @@ int main ( void ) {
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        glUseProgram(ProgramID);
-        double  timeValue = glfwGetTime();
-        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        int vertexColorLocation = glGetUniformLocation(ProgramID, "ourColor");
         
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        
 
-        
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        shader.use();
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
 
         // swap and call events
         glfwSwapBuffers(window);
@@ -138,9 +156,11 @@ int main ( void ) {
     } while (!glfwWindowShouldClose(window));
     
 
+
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(ProgramID);
+
+    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
