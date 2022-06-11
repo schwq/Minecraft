@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <algorithm>
 

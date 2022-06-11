@@ -16,7 +16,7 @@ GLuint shaderCompiler(const char *vertexFilePath, const char*fragmentFilePath) {
         vertexFile.read(&vertexContent[0], vertexFileSize);
 
         const char *vertexshaderSource = vertexContent.c_str();
-        std::cout << "Vertex Shader Code: \n" << vertexshaderSource << std::endl;
+        //std::cout << "Vertex Shader Code: \n" << vertexshaderSource << std::endl;
 
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexshaderSource, NULL);
@@ -48,7 +48,7 @@ GLuint shaderCompiler(const char *vertexFilePath, const char*fragmentFilePath) {
         fragmentFile.read(&fragmentContent[0], fragmentFileSize);
 
         const char *fragmentshaderSource = fragmentContent.c_str();
-        std::cout << "Fragment Shader Code: \n" << fragmentshaderSource << std::endl;
+        //std::cout << "Fragment Shader Code: \n" << fragmentshaderSource << std::endl;
 
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &fragmentshaderSource, NULL);

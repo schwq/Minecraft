@@ -1,6 +1,7 @@
 #include "include.h"
 #include "shaderCompiler.h"
 
+
 // Detected operating system
 constexpr const char system_os[] =
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -18,8 +19,9 @@ void error_callback(int error, const char* description);
 void escape_pressed(GLFWwindow *window);
 
 GLFWwindow* window;
-double global_time = glfwGetTime();
+double globalTime = glfwGetTime();
 int GLFW_MAJOR, GLFW_MINOR, GLFW_REVISION;
+int vertexAttribsMax;
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
@@ -65,28 +67,44 @@ int main ( void ) {
 
     //OpenGL Part
 
-    float vertices_coordinates[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f  
+    float vertices[] = {
+        0.5f, 0.5f, 0.0f, // top right
+        0.5f, -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f // top left
+    };
+
+    unsigned int indices[] = { // note that we start from 0!
+        0, 1, 3, // first triangle
+        1, 2, 3 // second triangle
     };
 
     // Vertex Buffer Object
     
-    unsigned int VAO;
+    unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    
-    unsigned int VBO;
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_coordinates), vertices_coordinates, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+
+
+    // WideMode, just drawing lines
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     GLuint ProgramID = shaderCompiler("./shaders/vertex.vertexshader", "./shaders/fragment.fragmentshader");
     
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &vertexAttribsMax);
+    printf("Maximun of Vertex Attributes supported: %i\n", vertexAttribsMax);
 
     /* 
     GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
@@ -101,19 +119,33 @@ int main ( void ) {
 
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
         glUseProgram(ProgramID);
+        double  timeValue = glfwGetTime();
+        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+        int vertexColorLocation = glGetUniformLocation(ProgramID, "ourColor");
+        
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+        
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         // swap and call events
         glfwSwapBuffers(window);
         glfwPollEvents(); 
     } while (!glfwWindowShouldClose(window));
     
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(ProgramID);
+
     glfwTerminate();
     return 0;
 }
+
 
 // Callback function for errors
 void error_callback(int error, const char* description) {
