@@ -1,4 +1,3 @@
-#include "include.h"
 #include <fstream>
 #include <iostream>
 #include "shaderCompiler.h"
@@ -6,7 +5,7 @@
 unsigned int vertexShader;
 unsigned int fragmentShader;
 
-GLuint shaderCompiler(const char *vertexFilePath, const char*fragmentFilePath) {
+Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
     std::ifstream vertexFile = std::ifstream(vertexFilePath, std::ios_base::in|std::ios::ate);
     if(vertexFile.is_open()) {
         auto vertexFileSize = vertexFile.tellg();
@@ -71,7 +70,6 @@ GLuint shaderCompiler(const char *vertexFilePath, const char*fragmentFilePath) {
         std::cout << "Error reading fragment shader" << std::endl;
     }
 
-    unsigned int shaderProgramID;
     shaderProgramID = glCreateProgram();
     glAttachShader(shaderProgramID, vertexShader);
     glAttachShader(shaderProgramID, fragmentShader);
@@ -88,6 +86,24 @@ GLuint shaderCompiler(const char *vertexFilePath, const char*fragmentFilePath) {
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    return shaderProgramID;
 }
+
+void Shader::use() {
+    glUseProgram(shaderProgramID);
+}
+
+void Shader::setBool(const std::string &name, bool value) const
+{         
+    glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), (int)value); 
+}
+
+void Shader::setInt(const std::string &name, int value) const
+{ 
+    glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), value); 
+}
+
+void Shader::setFloat(const std::string &name, float value) const
+{ 
+    glUniform1f(glGetUniformLocation(shaderProgramID, name.c_str()), value); 
+} 
+
