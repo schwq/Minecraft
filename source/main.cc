@@ -2,7 +2,6 @@
 #include "shaderCompiler.h"
 #include "textureCompiler.h"
 
-
 // Detected operating system
 constexpr const char system_os[] =
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -89,17 +88,15 @@ int main ( void ) {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
   
-    
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
@@ -115,14 +112,10 @@ int main ( void ) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    Texture texture("../source/textures/wood.jpg");
-
+    Texture texture("../source/textures/obama.jpg");
 
     // WideMode, just drawing lines
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-   
-
     
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &vertexAttribsMax);
     printf("Maximun of Vertex Attributes supported: %i\n", vertexAttribsMax);
@@ -133,18 +126,13 @@ int main ( void ) {
     GL_DYNAMIC_DRAW: the data is changed a lot and used many times.
     */ 
 
-  
-
     do {
         //input 
-        escape_pressed(window);
+        keyProcessFunc(window);
 
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
-        
-        
-
         glBindTexture(GL_TEXTURE_2D, textureID);
         shader.use();
         glBindVertexArray(VAO);
@@ -155,8 +143,6 @@ int main ( void ) {
         glfwPollEvents(); 
     } while (!glfwWindowShouldClose(window));
     
-
-
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 
@@ -165,7 +151,6 @@ int main ( void ) {
     glfwTerminate();
     return 0;
 }
-
 
 // Callback function for errors
 void error_callback(int error, const char* description) {
@@ -178,6 +163,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 // Checking if esc key was pressed for closing window
-void escape_pressed(GLFWwindow *window) {
+void keyProcessFunc(GLFWwindow *window) {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
 }

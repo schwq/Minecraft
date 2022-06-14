@@ -1,0 +1,9 @@
+settingsLog:true 
+vertexShader:vertex.vertexshader 
+fragmentShader:fragment.fragmentshader 
+material01Texture:wood.jpg
+material02Texture:obama.jpg
+audioEnable:true
+audioFolder:./audio 
+openglVersion:330
+glfwEnable:true
