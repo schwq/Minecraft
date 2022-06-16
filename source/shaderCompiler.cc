@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <typeinfo>
 #include "shaderCompiler.h"
 
 unsigned int vertexShader;
@@ -15,7 +16,6 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
         vertexFile.read(&vertexContent[0], vertexFileSize);
 
         const char *vertexshaderSource = vertexContent.c_str();
-        //std::cout << "Vertex Shader Code: \n" << vertexshaderSource << std::endl;
 
         vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, 1, &vertexshaderSource, NULL);
@@ -47,7 +47,6 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
         fragmentFile.read(&fragmentContent[0], fragmentFileSize);
 
         const char *fragmentshaderSource = fragmentContent.c_str();
-        //std::cout << "Fragment Shader Code: \n" << fragmentshaderSource << std::endl;
 
         fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, 1, &fragmentshaderSource, NULL);
@@ -90,16 +89,4 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
 
 void Shader::use() {
     glUseProgram(shaderProgramID);
-}
-
-template <class type> void setNumberShader(const std::string &name, type value) {
-    if(value == int){
-        glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), value);
-    }
-    if(value == bool){
-        glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), (int)value);
-    }
-    if(value == float){
-        glUniform1f(glGetUniformLocation(shaderProgramID, name.c_str()), value); 
-    }
 }

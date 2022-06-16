@@ -14,9 +14,9 @@ constexpr const char system_os[] =
  #error
 #endif
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void error_callback(int error, const char* description);
-void escape_pressed(GLFWwindow *window);
+void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void errorCallback(int error, const char* description);
+void keyProcessFunc(GLFWwindow *window);
 
 GLFWwindow* window;
 double globalTime = glfwGetTime();
@@ -54,9 +54,9 @@ int main ( void ) {
     // Make context 
     glfwMakeContextCurrent(window);
     // GLFW error handing callback
-    glfwSetErrorCallback(error_callback);
+    glfwSetErrorCallback(errorCallback);
     // Window resize
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
      // checking is GLAD initialized
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
@@ -103,7 +103,7 @@ int main ( void ) {
     glEnableVertexAttribArray(2);
 
     Shader shader("./shaders/vertex.vertexshader", "./shaders/fragment.fragmentshader");
-
+    
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -128,13 +128,23 @@ int main ( void ) {
 
     do {
         //input 
-        keyProcessFunc(window);
 
+        keyProcessFunc(window);
         glClearColor(0.2f, 0.4f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         
         glBindTexture(GL_TEXTURE_2D, textureID);
+        
+        glm::mat4 transformation = glm::mat4(1.0f);
+        transformation = glm::translate(transformation, glm::vec3(0.5f, -0.5f, 0.0f));
+        transformation = glm::rotate(transformation, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+
+
         shader.use();
+        unsigned int transformationLoc = glGetUniformLocation(shader.shaderProgramID, "transform");
+        glUniformMatrix4fv(transformationLoc, 1, GL_FALSE, glm::value_ptr(transformation));
+        
+        
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -153,12 +163,12 @@ int main ( void ) {
 }
 
 // Callback function for errors
-void error_callback(int error, const char* description) {
+void errorCallback(int error, const char* description) {
     fprintf(stderr, "Error: %s\n", description);
 }
 
 // Callback function for resizing window
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 

@@ -9,11 +9,16 @@
 #include <algorithm>
 
 // OPENGL group
-//#include <GL/gl.h>
+
 #include <glm/glm.hpp>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-//#include <GL/glew.h>
-//#include <GL/glut.h>
+// glad includes opengl headers 
 #include <glad/glad.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext.hpp>
 #endif
+
