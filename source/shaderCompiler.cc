@@ -1,5 +1,4 @@
 #include <fstream>
-#include <iostream>
 #include <typeinfo>
 #include "shaderCompiler.h"
 
@@ -10,7 +9,7 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
     std::ifstream vertexFile = std::ifstream(vertexFilePath, std::ios_base::in|std::ios::ate);
     if(vertexFile.is_open()) {
         auto vertexFileSize = vertexFile.tellg();
-        std::cout << "Vertex shader file size: " << vertexFileSize << std::endl;
+        std::cout << "INFO: Vertex shader file size: " << vertexFileSize << std::endl;
         vertexFile.seekg(std::ios::beg);
         std::string vertexContent(vertexFileSize, 0);
         vertexFile.read(&vertexContent[0], vertexFileSize);
@@ -27,21 +26,21 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
 
         if(!vertex_shader_success_compiled) {
             glGetShaderInfoLog(vertexShader, 512, NULL, vertex_infoLog);
-            std::cout << "ERROR, VERTEX SHADER COMPILATION FAILED\n" << vertex_infoLog << std::endl;
+            std::cout << "ERROR: Vertex shader compilation failed!\n" << vertex_infoLog << std::endl;
         } else {
-            std::cout << "Vertex Shader Compilation Succeeded!" << std::endl;
+            std::cout << "SUCCESS: vertex shader compilation succeeded!" << std::endl;
         }
 
         vertexFile.close();
     }
     else {
-        std::cout << "Error reading vertex shader" << std::endl;
+        std::cout << "ERROR: Cannot read vertex shader" << std::endl;
     }
 
     std::ifstream fragmentFile = std::ifstream(fragmentFilePath, std::ios_base::in|std::ios::ate);
     if(fragmentFile.is_open()) {
         auto fragmentFileSize = fragmentFile.tellg();
-        std::cout << "Fragment shader file size: " << fragmentFileSize << std::endl;
+        std::cout << "INFO: Fragment shader file size: " << fragmentFileSize << std::endl;
         fragmentFile.seekg(std::ios::beg);
         std::string fragmentContent(fragmentFileSize, 0);
         fragmentFile.read(&fragmentContent[0], fragmentFileSize);
@@ -58,15 +57,15 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
 
         if(!fragment_shader_success_compiled) {
             glGetShaderInfoLog(fragmentShader, 512, NULL, fragment_infoLog);
-            std::cout << "ERROR, FRAGMENT SHADER COMPILATION FAILED\n" << fragment_infoLog << std::endl;
+            std::cout << "ERROR: Fragment shader compilation failed!\n" << fragment_infoLog << std::endl;
         } else {
-            std::cout << "Fragment Shader Compilation Succeeded!" << std::endl;
+            std::cout << "SUCCESS: Fragment shader compilation succeeded!" << std::endl;
         }
 
         fragmentFile.close();
     }
     else {
-        std::cout << "Error reading fragment shader" << std::endl;
+        std::cout << "ERROR: cannot read fragment shader" << std::endl;
     }
 
     shaderProgramID = glCreateProgram();
@@ -80,7 +79,7 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
     if(!linking_success){
         glGetProgramInfoLog(shaderProgramID, 512, NULL, linking_infoLog);
     } else {
-        std::cout << "ProgramID linking Succeeded!" << std::endl;
+        std::cout << "SUCCESS: ProgramID linking succeeded!" << std::endl;
     }
 
     glDeleteShader(vertexShader);
@@ -89,4 +88,13 @@ Shader::Shader(const char *vertexFilePath, const char*fragmentFilePath) {
 
 void Shader::use() {
     glUseProgram(shaderProgramID);
+}
+
+void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const {
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+
+void Shader::setInt(const std::string &name, int value) const
+{ 
+    glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), value); 
 }

@@ -1,8 +1,7 @@
 #ifndef INCLUDE_HEADER
 #define INCLUDE_HEADER
 // Basic group
-#include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
 #include <string>
 #include <cmath>
 #include <memory>
@@ -15,8 +14,6 @@
 #include <GLFW/glfw3.h>
 // glad includes opengl headers 
 #include <glad/glad.h>
-
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext.hpp>
