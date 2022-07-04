@@ -6,6 +6,7 @@
 #include <cmath>
 #include <memory>
 #include <algorithm>
+#include <vector>
 
 // OPENGL group
 
