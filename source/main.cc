@@ -3,6 +3,10 @@
 #include "textureCompiler.h"
 #include "camera.h"
 
+#include "../libraries/imgui/imgui.h"
+#include "../libraries/imgui/imgui_impl_glfw.h"
+#include "../libraries/imgui/imgui_impl_opengl3.h"
+
 // Detected operating system
 constexpr const char system_os[] =
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -73,6 +77,13 @@ int main ( void ) {
         return -1;
     }
     // ------------------------------------------------------------------------------------------------------------------------------
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     glEnable(GL_DEPTH_TEST);
     Shader shader("./shaders/vertex.vertexshader", "./shaders/fragment.fragmentshader");
@@ -181,11 +192,12 @@ int main ( void ) {
 
     do {
         //input 
-
         keyProcessFunc(window);
         glClearColor(0.0f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         
+
         glBindTexture(GL_TEXTURE_2D, textureID);
 
         double currentTime = glfwGetTime();
@@ -206,12 +218,6 @@ int main ( void ) {
         shader.setMat4("view",view);
         
         glBindVertexArray(VAO);
-        int i = 0;
-        i++;
-        if(200 % i == 0 ){
-             std::cout << camera.cameraPosition.x << "." << camera.cameraPosition.y << "." << camera.cameraPosition.z << std::endl;
-             std::cout << camera.XOFFSET << "    " << camera.YOFFSET << std::endl;
-        }
         // models
         for(unsigned int i = 0; i < 10; i++) {
             glm::mat4 model = glm::mat4(1.0f);
@@ -222,12 +228,26 @@ int main ( void ) {
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Hello world");
+        ImGui::Text("Text");
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // swap and call events
         glfwSwapBuffers(window);
         glfwPollEvents(); 
     } while (!glfwWindowShouldClose(window));
-    
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     
